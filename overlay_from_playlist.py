@@ -3,22 +3,9 @@ import requests
 import io
 from PIL import Image, ImageDraw, ImageFont
 
-file_path = 'JBSL2_J1ROUND_1.json'
+file_path = 'xxxxxxxxx.json'  # path of the playlist(*.json, *.bplist)
 
 j = json.loads(open(file_path).read())
-
-
-def json_tree(data, indent=0):
-    space = ' '*indent
-    if type(data) == dict:
-        for k in data.keys():
-            print('\n', space, k, end='')
-            json_tree(data[k], indent+4)
-    elif type(data) == list and len(data) > 0:
-        json_tree(data[0], indent+4)
-    else:
-        print(' :', data, end='')
-    return
 
 
 def text_over(img, text, height):
