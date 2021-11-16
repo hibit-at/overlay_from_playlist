@@ -1,11 +1,9 @@
 import json
 import requests
 import io
+import os
+import re
 from PIL import Image, ImageDraw, ImageFont
-
-file_path = 'xxxxxxxxx.json'  # path of the playlist(*.json, *.bplist)
-
-j = json.loads(open(file_path).read())
 
 
 def text_over(img, text, height):
@@ -29,28 +27,37 @@ def text_over(img, text, height):
     return img
 
 
-def image_make(cover_url, title, author, mapper, diff, bpm):
-    canvasSize = (1920, 300)
-    backgroundRGB = (0, 0, 0, 0)
-    img = Image.new('RGBA', canvasSize, backgroundRGB)
-    cover_img = Image.open(io.BytesIO(requests.get(cover_url).content))
-    img.paste(cover_img, (25, 25))
-    img = text_over(img, title, 50)
-    img = text_over(img, author, 100)
-    img = text_over(img, mapper, 150)
-    img = text_over(img, diff, 200)
-    img.save(f"{title}.png")
+def process_playlist(playlist_name, playlist):
+    for song in playlist['songs']:
+        hash = song['hash']
+        diff = song['difficulties'][0]['name'].replace('Plus', '+')
+        diff = diff.capitalize()
+        url = f'https://api.beatsaver.com/maps/hash/{hash}'
+        res = requests.get(url).json()
+        print(hash, diff)
+        title = res['metadata']['songName']
+        title = re.sub(r'[\\/:*?"<>|]+', '', title)
+        author = res['metadata']['songAuthorName']
+        mapper = res['metadata']['levelAuthorName']
+        bpm = res['metadata']['bpm']
+        cover_url = res['versions'][0]['coverURL']
+        canvasSize = (1920, 300)
+        backgroundRGB = (0, 0, 0, 0)
+        img = Image.new('RGBA', canvasSize, backgroundRGB)
+        cover_img = Image.open(io.BytesIO(requests.get(cover_url).content))
+        img.paste(cover_img, (25, 25))
+        img = text_over(img, title, 50)
+        img = text_over(img, author, 100)
+        img = text_over(img, mapper, 150)
+        img = text_over(img, diff, 200)
+        if not os.path.exists(playlist_name):
+            os.mkdir(playlist_name)
+        img.save(f"{playlist_name}/{title}.png")
 
 
-for song in j['songs']:
-    hash = song['hash']
-    diff = song['difficulties'][0]['name'].replace('Plus', '+')
-    url = f'https://api.beatsaver.com/maps/hash/{hash}'
-    res = requests.get(url).json()
-    print(hash, diff)
-    title = res['metadata']['songName']
-    author = res['metadata']['songAuthorName']
-    mapper = res['metadata']['levelAuthorName']
-    bpm = res['metadata']['bpm']
-    cover_url = res['versions'][0]['coverURL']
-    image_make(cover_url, title, author, mapper, diff, bpm)
+for file_path in os.listdir():
+    extension = file_path.split('.')[-1]
+    if extension == 'json' or extension == 'bplist':
+        playlist_name = file_path.split('.')[0]
+        playlist = json.loads(open(file_path).read())
+        process_playlist(playlist_name, playlist)
