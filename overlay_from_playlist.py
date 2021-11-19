@@ -55,7 +55,6 @@ def process_playlist(playlist_name, playlist):
         img.save(f"{playlist_name}/{title}.png")
 
 
-
 if __name__ == "__main__":
     for file_path in os.listdir():
         extension = file_path.split('.')[-1]
