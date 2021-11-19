@@ -55,9 +55,11 @@ def process_playlist(playlist_name, playlist):
         img.save(f"{playlist_name}/{title}.png")
 
 
-for file_path in os.listdir():
-    extension = file_path.split('.')[-1]
-    if extension == 'json' or extension == 'bplist':
-        playlist_name = file_path.split('.')[0]
-        playlist = json.loads(open(file_path).read())
-        process_playlist(playlist_name, playlist)
+
+if __name__ == "__main__":
+    for file_path in os.listdir():
+        extension = file_path.split('.')[-1]
+        if extension == 'json' or extension == 'bplist':
+            playlist_name = file_path.split('.')[0]
+            playlist = json.loads(open(file_path).read())
+            process_playlist(playlist_name, playlist)
