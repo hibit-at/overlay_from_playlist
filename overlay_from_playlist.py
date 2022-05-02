@@ -76,5 +76,5 @@ if __name__ == "__main__":
         extension = file_path.split('.')[-1]
         if extension == 'json' or extension == 'bplist':
             playlist_name = file_path.split('.')[0]
-            playlist = json.loads(open(file_path).read())
+            playlist = json.loads(open(file_path, encoding='utf-8').read())
             process_playlist(playlist_name, playlist)
